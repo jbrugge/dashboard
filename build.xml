@@ -1,0 +1,100 @@
+<project name="dashboard" default="jar" basedir=".">
+    <description>Build script for Groovy dashboard tool.</description>
+    <property environment="env"/>
+    <property name="groovy.home"    value="${env.GROOVY_HOME}"/>
+    <property name="glean.home"     value="${user.home}/work/glean"/>
+    <property name="junit.home"     value="${user.home}/tools/junit4.2"/>
+    <property name="dashboard.home" value="${user.home}/tools/dashboard"/>
+    
+    <property name="version"        value="1.0"/>
+    <property name="dist.name"      value="dashboard-${version}"/>
+    <property name="src.dir"        value="src"/>
+    <property name="bin.dir"        value="bin"/>
+    <property name="lib.dir"        value="lib"/>
+    <property name="dist.dir"       value="dist"/>
+    <property name="install.dir"    value="${dashboard.home}"/>
+    
+    <path id="compile.classpath">
+        <fileset dir="${junit.home}" includes="**/*.jar"/>
+        <fileset dir="${groovy.home}/lib" includes="xerces*.jar, xml-api*.jar"/>
+        <pathelement path="${groovy.home}/embeddable/groovy-all-1.0.jar"/>
+    </path>
+        
+    <patternset id="src.files">
+        <exclude name="${dist.dir}/"/>
+        <exclude name="${bin.dir}/"/>
+    </patternset>
+
+    <taskdef name="groovyc"
+         classname="org.codehaus.groovy.ant.Groovyc"
+         classpath="${groovy.home}/embeddable/groovy-all-1.0.jar"/>
+         
+    <target name="init">
+        <mkdir dir="${bin.dir}"/>
+        <mkdir dir="${lib.dir}"/>
+    </target>
+    
+    <target name="compile" depends="init">
+        <groovyc srcdir="${src.dir}" destdir="${bin.dir}">
+            <classpath refid="compile.classpath"/>
+        </groovyc>
+    </target>
+    
+    <target name="jar" depends="compile">
+        <jar destfile="${lib.dir}/${dist.name}.jar" basedir="${bin.dir}"/>
+    </target>
+    
+    <target name="test" depends="compile">
+        <junit printsummary="true" haltonfailure="no" haltonerror="no" fork="yes">
+            <formatter type="plain" usefile="false"/>
+            <batchtest>
+                <fileset dir="${bin.dir}" includes="**/*Test.class"/>
+            </batchtest>
+            <classpath>
+                <pathelement path="${bin.dir}"/>
+                <pathelement location="${groovy.home}/embeddable/groovy-all-1.0.jar"/>
+            </classpath>
+        </junit>
+    </target>
+
+    <target name="package" depends="package-zip, package-gzip"/>
+    
+    <target name="package-zip"
+        depends="jar"
+    	description="Package up a distribution as a ZIP archive">
+        <mkdir dir="${dist.dir}"/>
+        
+        <zip destfile="${dist.dir}/${dist.name}.zip">
+            <zipfileset dir="${basedir}" prefix="${dist.name}">
+                <patternset refid="src.files"/>
+            </zipfileset>
+        </zip>
+    </target>
+    
+    <target name="package-gzip"
+        depends="jar"
+    	description="Package up a distribution as a gzip archive">
+        <mkdir dir="${dist.dir}"/>
+        
+        <tar destfile="${dist.dir}/${dist.name}.tar.gz"
+            compression="gzip">
+            <tarfileset dir="${basedir}" prefix="${dist.name}">
+                <patternset refid="src.files"/>
+            </tarfileset>
+        </tar>
+    </target>
+    
+    <target name="install" depends="jar">
+        <copy file="${lib.dir}/dashboard.jar" todir="${install.dir}"/>
+    </target>
+    
+    <target name="publish" depends="jar">
+        
+    </target>
+    
+    <target name="clean">
+        <delete dir="${bin.dir}"/>
+        <delete dir="${lib.dir}"/>
+    </target>
+    
+</project>
