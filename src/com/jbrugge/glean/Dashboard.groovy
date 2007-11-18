@@ -33,7 +33,10 @@ class Dashboard {
                 "schemaspy" : "Database schema browser",
                 "dbdoclet" : "Javadoc as Docbook",
                 "umlgraph-doc" : "Javadoc with embedded UML",
-                "linguine-ant" : "Ant structure doc"
+                "linguine-ant" : "Ant structure doc",
+                "linguine-hbm" : "Hibernate structure doc",
+                "statsvn" : "Subversion repository activity",
+                "statcvs" : "CVS repository activity"
                 ]
     String projectName
     String buildTime
